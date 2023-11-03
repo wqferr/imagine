@@ -116,20 +116,12 @@ exports.cpolar = cpolar
 
 ---Complex square root function
 ---@param z Complex|number point whose square roots are desired
----@param bothValues boolean? whether to return one (false, default) or both (true) square roots
 ---@return Complex|number
----@return Complex|number?
-local function csqrt(z, bothValues)
-    local r
+local function csqrt(z)
     if type(z) == "number" then
-        r = math.sqrt(z)
+        return math.sqrt(z)
     else
-        r = z^0.5
-    end
-    if bothValues then
-        return r, -r
-    else
-        return r
+        return z^0.5
     end
 end
 M.sqrt = csqrt
