@@ -1,3 +1,4 @@
+---@class imagine
 local M = {}
 local exports = {}
 
@@ -39,6 +40,7 @@ exports.i = M.i
 local function isComplex(z)
     return allComplexes[z]
 end
+M.isComplex = isComplex
 exports.isComplex = isComplex
 
 local function asComplex(value)
@@ -47,9 +49,11 @@ local function asComplex(value)
     elseif type(value) == "number" then
         return newComplex(value, 0)
     else
-        error(("Cannot convert %q to complex"):format(type(value)))
+        error(("Cannot convert %s to complex"):format(type(value)))
     end
 end
+M.asComplex = asComplex
+exports.asComplex = asComplex
 
 local function cabs(z)
     if type(z) == "number" then
@@ -57,9 +61,10 @@ local function cabs(z)
     elseif isComplex(z) then
         return math.sqrt(z.real * z.real + z.imag * z.imag)
     else
-        error(("Cannot calculate absolute value of %q"):format(type(z)))
+        error(("Cannot calculate absolute value of %s"):format(type(z)))
     end
 end
+M.abs = cabs
 Complex.abs = cabs
 exports.cabs = cabs
 
@@ -69,9 +74,10 @@ local function carg(z)
     elseif isComplex(z) then
         return math.atan(z.imag, z.real)
     else
-        error(("Cannot calculate argument of %q"):format(type(z)))
+        error(("Cannot calculate argument of %s"):format(type(z)))
     end
 end
+M.arg = carg
 Complex.arg = carg
 exports.carg = carg
 
@@ -79,6 +85,7 @@ exports.carg = carg
 ---@param theta number
 ---@return Complex
 local function cis(theta)
+    assert(type(theta) == "number", "Angle must be a real number")
     return newComplex(math.cos(theta), math.sin(theta))
 end
 
@@ -91,24 +98,35 @@ local function cexp(z)
     elseif isComplex(z) then
         return math.exp(z.real) * cis(z.imag)
     else
-        error(("Cannot calculate complex exponential of %q"):format(z))
+        error(("Cannot calculate complex exponential of %s"):format(type(z)))
     end
 end
+M.exp = cexp
 exports.cexp = cexp
 
 local function clog(z)
-    return newComplex(math.log(z:norm()), z:arg())
+    if type(z) == "number" then
+        return math.log(z)
+    elseif isComplex(z) then
+        return newComplex(math.log(z:abs()), z:arg())
+    else
+        error(("Cannot calculate complex logarithm of %s"):format(type(z)))
+    end
 end
+M.log = clog
 exports.clog = clog
 
 local function cconj(z)
     z = asComplex(z)
     return newComplex(z.real, -z.imag)
 end
+M.conj = cconj
 Complex.conj = cconj
 exports.cconj = cconj
 
 local function cpolar(abs, arg)
+    assert(type(abs) == "number", "Absolute value must be a real number")
+    assert(type(arg) == "number", "Argument must be a real number")
     return abs * cis(arg)
 end
 M.polar = cpolar
@@ -266,23 +284,38 @@ Complex__meta.__tostring = function(x)
     if a == 0 then
         if b == 0 then
             return "0"
+        elseif b == 1 then
+            return "i"
+        elseif b == -1 then
+            return "-i"
         else
             return tostring(b).."i"
         end
     elseif b == 0 then
-        return a
+        return tostring(a)
     end
     if b > 0 then
-        return ("%s + %si"):format(a, b)
+        if b == 1 then
+            return ("%s + i"):format(a)
+        else
+            return ("%s + %si"):format(a, b)
+        end
     else
-        return ("%s - %si"):format(a, -b)
+        if b == -1 then
+            return ("%s - i"):format(a)
+        else
+            return ("%s - %si"):format(a, -b)
+        end
     end
 end
 
--- renames = {oldName: newName}
-M.import = function(renames, into)
+
+---Imports commonly used functions into the global or specified namespace
+---@param renames {string: string, into: table}? mapping from old names new names, with the special key "into" containing the table into which to import values
+---@return imagine imagine the module itself, so that this function can be called in the same line as the require
+M.import = function(renames)
     renames = renames or {}
-    into = into or _G
+    local into = renames.into or _G
     for k, v in pairs(exports) do
         local name = renames[k] or k
         into[name] = v
@@ -290,10 +323,12 @@ M.import = function(renames, into)
     return M
 end
 
--- whichPlusRenames: string[] U {oldName: newName}
-M.partialImport = function(whichPlusRenames, into)
+---Imports only selected values into the global or specified namespace
+---@param whichPlusRenames {string: string, into: table} mapping from old names to new names, with the special key "into" containing the table into which  to import values; if a value is not renamed, its name can be provided in the array part of the table
+---@return imagine imagine the module itself, so that this function can be called in the same line as the require
+M.partialImport = function(whichPlusRenames)
     assert(whichPlusRenames, "Which items are to be imported must be passed to partialImport.")
-    into = into or _G
+    local into = whichPlusRenames.into or _G
     for k, v in pairs(whichPlusRenames) do
         if type(k) == "number" then
             -- array part of table
@@ -310,11 +345,7 @@ end
 
 local M__meta = {}
 function M__meta.__call(_, a, b)
-    if a and not b then
-        return asComplex(a)
-    else
-        return newComplex(a, b)
-    end
+    return newComplex(a, b)
 end
 setmetatable(M, M__meta)
 
