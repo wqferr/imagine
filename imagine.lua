@@ -210,15 +210,6 @@ M.atan = catan
 exports.catan = catan
 
 
-function M.type(value)
-    if isComplex(value) then
-        return "complex"
-    else
-        return math.type(value)
-    end
-end
-
-
 local function cnear(x, y)
     return (x-y):abs() <= M.epsilon
 end
