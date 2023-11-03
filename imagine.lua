@@ -114,11 +114,22 @@ end
 M.polar = cpolar
 exports.cpolar = cpolar
 
-local function csqrt(z)
+---Complex square root function
+---@param z Complex|number point whose square roots are desired
+---@param bothValues boolean? whether to return one (false, default) or both (true) square roots
+---@return Complex|number
+---@return Complex|number?
+local function csqrt(z, bothValues)
+    local r
     if type(z) == "number" then
-        return math.sqrt(z)
+        r = math.sqrt(z)
     else
-        return z^0.5
+        r = z^0.5
+    end
+    if bothValues then
+        return r, -r
+    else
+        return r
     end
 end
 M.sqrt = csqrt
@@ -146,6 +157,27 @@ end
 M.tanh = ctanh
 exports.ctanh = ctanh
 
+local function casinh(z)
+    z = asComplex(z)
+    return clog(z + csqrt(z*z + 1))
+end
+M.asinh = casinh
+exports.casinh = casinh
+
+local function cacosh(z)
+    z = asComplex(z)
+    return clog(z + csqrt(z*z - 1))
+end
+M.acosh = cacosh
+exports.cacosh = cacosh
+
+local function catanh(z)
+    z = asComplex(z)
+    return 0.5 * clog((1 + z) / (1 - z))
+end
+M.atanh = catanh
+exports.catanh = catanh
+
 local function csin(z)
     return -M.i * csinh(M.i * z)
 end
@@ -163,6 +195,27 @@ local function ctan(z)
 end
 M.tan = ctan
 exports.ctan = ctan
+
+local function casin(z)
+    z = asComplex(z)
+    return -M.i * clog(csqrt(1 - z*z) + M.i*z)
+end
+M.asin = casin
+exports.casin = casin
+
+local function cacos(z)
+    z = asComplex(z)
+    return -M.i * clog(M.i*csqrt(1 - z*z) + z)
+end
+M.acos = cacos
+exports.cacos = cacos
+
+local function catan(z)
+    z = asComplex(z)
+    return -M.i/2 * clog((M.i - z) / (M.i + z))
+end
+M.atan = catan
+exports.catan = catan
 
 local function cnear(x, y)
     return (x-y):norm() <= M.epsilon
