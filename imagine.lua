@@ -124,6 +124,46 @@ end
 M.sqrt = csqrt
 exports.csqrt = csqrt
 
+local function csinh(z)
+    z = asComplex(z)
+    return (cexp(z) - cexp(-z)) / 2
+end
+M.sinh = csinh
+exports.csinh = csinh
+
+local function ccosh(z)
+    z = asComplex(z)
+    return (cexp(z) + cexp(-z)) / 2
+end
+M.cosh = ccosh
+exports.ccosh = ccosh
+
+local function ctanh(z)
+    z = asComplex(z)
+    local z2 = 2*z
+    return ((cexp(z2) - 1) / (cexp(z2) + 1))
+end
+M.tanh = ctanh
+exports.ctanh = ctanh
+
+local function csin(z)
+    return -M.i * csinh(M.i * z)
+end
+M.sin = csin
+exports.csin = csin
+
+local function ccos(z)
+    return ccosh(M.i * z)
+end
+M.cos = ccos
+exports.ccos = ccos
+
+local function ctan(z)
+    return -M.i * ctanh(z)
+end
+M.tan = ctan
+exports.ctan = ctan
+
 local function cnear(x, y)
     return (x-y):norm() <= M.epsilon
 end

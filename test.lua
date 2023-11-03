@@ -3,7 +3,7 @@ local im = require "imagine".partialImport {i = "I", "cconj"}
 ---@diagnostic disable-next-line: undefined-global
 print(cexp) -- should be nil
 local z1 = im(3, 4)
----@cast I Complex
+
 local z2 = -I
 print(z1)
 print(z2)
