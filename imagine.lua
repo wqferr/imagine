@@ -51,17 +51,17 @@ local function asComplex(value)
     end
 end
 
-local function cnorm(z)
+local function cabs(z)
     if type(z) == "number" then
         return math.abs(z)
     elseif isComplex(z) then
         return math.sqrt(z.real * z.real + z.imag * z.imag)
     else
-        error(("Cannot calculate norm of %q"):format(type(z)))
+        error(("Cannot calculate absolute value of %q"):format(type(z)))
     end
 end
-Complex.norm = cnorm
-exports.cnorm = cnorm
+Complex.abs = cabs
+exports.cabs = cabs
 
 local function carg(z)
     if type(z) == "number" then
@@ -121,7 +121,7 @@ local function csqrt(z)
     if type(z) == "number" then
         return math.sqrt(z)
     else
-        return z^0.5
+        return M.polar(math.sqrt(z:abs()), z:arg() / 2)
     end
 end
 M.sqrt = csqrt
@@ -210,7 +210,7 @@ M.atan = catan
 exports.catan = catan
 
 local function cnear(x, y)
-    return (x-y):norm() <= M.epsilon
+    return (x-y):abs() <= M.epsilon
 end
 
 local function rnear(x, y)
