@@ -1,5 +1,5 @@
 local im = require "imagine".partialImport {i = "I", "cconj"}
-print(cexp)
+print(cexp) -- should be nil
 local z1 = im(3, 4)
 local z2 = -I
 print(z1)
