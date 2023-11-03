@@ -9,6 +9,12 @@ M.epsilon = 1e-12
 ---@class Complex
 ---@field real number real part of the complex number
 ---@field imag number imaginary part of the complex number
+---@operator add(Complex|number): Complex
+---@operator sub(Complex|number): Complex
+---@operator mul(Complex|number): Complex
+---@operator div(Complex|number): Complex
+---@operator pow(Complex|number): Complex
+---@operator unm: Complex
 local Complex = {}
 local Complex__meta = {__index = Complex}
 
@@ -102,6 +108,22 @@ end
 Complex.conj = cconj
 exports.cconj = cconj
 
+local function cpolar(norm, arg)
+    return norm * cis(arg)
+end
+M.polar = cpolar
+exports.cpolar = cpolar
+
+local function csqrt(z)
+    if type(z) == "number" then
+        return math.sqrt(z)
+    else
+        return z^0.5
+    end
+end
+M.sqrt = csqrt
+exports.csqrt = csqrt
+
 local function cnear(x, y)
     return (x-y):norm() <= M.epsilon
 end
@@ -134,10 +156,6 @@ Complex__meta.__div = function(x, y)
     return newComplex((a*c + b*d) / ynorm2, (b*c - a*d) / ynorm2)
 end
 
----Calculates complex exponentiation
----@param x Complex|number base
----@param y Complex|number exponent
----@return Complex
 Complex__meta.__pow = function(x, y)
     return cexp(y * clog(x))
 end
