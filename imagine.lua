@@ -23,6 +23,10 @@ local allComplexes = {}
 setmetatable(allComplexes, {__mode = "k", __index = function() return false end})
 
 
+---Creates a new complex number with given real and imaginary parts
+---@param real number real part of complex number
+---@param imag number imaginary part of complex number
+---@return Complex
 local function newComplex(real, imag)
     assert(real and imag, "Both parts of the complex number must be given")
     assert(type(real) == "number", "Real part of a complex number must be a real number")
@@ -35,16 +39,22 @@ local function newComplex(real, imag)
 end
 M.i = newComplex(0, 1)
 exports.i = M.i
--- exports.newComplex = newComplex -- calling the module with 2 arguments has the same effect
 
+---Checks whether a value is a complex number
+---@param z any
+---@return boolean
 local function isComplex(z)
     return allComplexes[z]
 end
 M.isComplex = isComplex
 exports.isComplex = isComplex
 
+---Assures value is a complex number, if conversion is possible; is a no-op if value is a complex number
+---@param value Complex|number value to be converted
+---@return Complex
 local function asComplex(value)
     if isComplex(value) then
+        ---@cast value Complex
         return value
     elseif type(value) == "number" then
         return newComplex(value, 0)
@@ -55,6 +65,9 @@ end
 M.asComplex = asComplex
 exports.asComplex = asComplex
 
+---Calculates the absolute value of the number
+---@param z Complex|number
+---@return number
 local function cabs(z)
     if type(z) == "number" then
         return math.abs(z)
@@ -68,6 +81,9 @@ M.abs = cabs
 Complex.abs = cabs
 exports.cabs = cabs
 
+---Calculates the argument (or phase) of the complex number
+---@param z Complex|number
+---@return number
 local function carg(z)
     if type(z) == "number" then
         return 0
@@ -89,7 +105,7 @@ local function cis(theta)
     return newComplex(math.cos(theta), math.sin(theta))
 end
 
----Complex exponential
+---Complex exponential function, calculates e^z
 ---@param z Complex|number
 ---@return Complex
 local function cexp(z)
@@ -104,9 +120,12 @@ end
 M.exp = cexp
 exports.cexp = cexp
 
+---Complex logarithm function, calculates ln(z)
+---@param z Complex|number
+---@return Complex
 local function clog(z)
     if type(z) == "number" then
-        return math.log(z)
+        return newComplex(math.log(z), 0)
     elseif isComplex(z) then
         return newComplex(math.log(z:abs()), z:arg())
     else
@@ -116,6 +135,9 @@ end
 M.log = clog
 exports.clog = clog
 
+---Conjugate, for a+bi returns a-bi
+---@param z Complex|number
+---@return Complex
 local function cconj(z)
     z = asComplex(z)
     return newComplex(z.real, -z.imag)
@@ -124,6 +146,10 @@ M.conj = cconj
 Complex.conj = cconj
 exports.cconj = cconj
 
+---Creates a complex number from its polar form
+---@param abs number absolute value of complex number
+---@param arg number argument or phase of complex number
+---@return Complex
 local function cpolar(abs, arg)
     assert(type(abs) == "number", "Absolute value must be a real number")
     assert(type(arg) == "number", "Argument must be a real number")
@@ -133,7 +159,7 @@ M.polar = cpolar
 exports.cpolar = cpolar
 
 ---Complex square root function
----@param z Complex|number point whose square roots are desired
+---@param z Complex|number point whose square root is desired
 ---@return Complex|number
 local function csqrt(z)
     if type(z) == "number" then
@@ -145,6 +171,9 @@ end
 M.sqrt = csqrt
 exports.csqrt = csqrt
 
+---Hyperbolic sine
+---@param z Complex|number
+---@return Complex
 local function csinh(z)
     z = asComplex(z)
     return (cexp(z) - cexp(-z)) / 2
@@ -152,6 +181,9 @@ end
 M.sinh = csinh
 exports.csinh = csinh
 
+---Hyperbolic cosine
+---@param z Complex|number
+---@return Complex
 local function ccosh(z)
     z = asComplex(z)
     return (cexp(z) + cexp(-z)) / 2
@@ -159,6 +191,9 @@ end
 M.cosh = ccosh
 exports.ccosh = ccosh
 
+---Hyperbolic tangent
+---@param z Complex|number
+---@return Complex
 local function ctanh(z)
     z = asComplex(z)
     local z2 = 2*z
@@ -167,6 +202,9 @@ end
 M.tanh = ctanh
 exports.ctanh = ctanh
 
+---Area hyperbolic sine
+---@param z Complex|number
+---@return Complex
 local function casinh(z)
     z = asComplex(z)
     return clog(z + csqrt(z*z + 1))
@@ -174,6 +212,9 @@ end
 M.asinh = casinh
 exports.casinh = casinh
 
+---Area hyperbolic cosine
+---@param z Complex|number
+---@return Complex
 local function cacosh(z)
     z = asComplex(z)
     return clog(z + csqrt(z*z - 1))
@@ -181,6 +222,9 @@ end
 M.acosh = cacosh
 exports.cacosh = cacosh
 
+---Area hyperbolic tangent
+---@param z Complex|number
+---@return Complex
 local function catanh(z)
     z = asComplex(z)
     return 0.5 * clog((1 + z) / (1 - z))
@@ -188,24 +232,36 @@ end
 M.atanh = catanh
 exports.catanh = catanh
 
+---Sine function
+---@param z Complex|number
+---@return Complex
 local function csin(z)
     return -M.i * csinh(M.i * z)
 end
 M.sin = csin
 exports.csin = csin
 
+---Cosine function
+---@param z Complex|number
+---@return Complex
 local function ccos(z)
     return ccosh(M.i * z)
 end
 M.cos = ccos
 exports.ccos = ccos
 
+---Tangent function
+---@param z Complex|number
+---@return Complex
 local function ctan(z)
     return -M.i * ctanh(z)
 end
 M.tan = ctan
 exports.ctan = ctan
 
+---Arcsine function
+---@param z Complex|number
+---@return Complex
 local function casin(z)
     z = asComplex(z)
     return -M.i * clog(csqrt(1 - z*z) + M.i*z)
@@ -213,6 +269,9 @@ end
 M.asin = casin
 exports.casin = casin
 
+---Arccosine function
+---@param z Complex|number
+---@return Complex
 local function cacos(z)
     z = asComplex(z)
     return -M.i * clog(M.i*csqrt(1 - z*z) + z)
@@ -220,6 +279,9 @@ end
 M.acos = cacos
 exports.cacos = cacos
 
+---Arctangent function
+---@param z Complex|number
+---@return Complex
 local function catan(z)
     z = asComplex(z)
     return -M.i/2 * clog((M.i - z) / (M.i + z))
