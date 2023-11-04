@@ -4,12 +4,12 @@ local exports = {}
 
 -- Double floating point precision
 -- If using a Lua distribution that uses floats instead of doubles,
--- set epsilon to 1e-6
+-- or if you want more lax equality checks, set epsilon to 1e-6
 M.epsilon = 1e-12
 
 ---@class Complex
----@field real number real part of the complex number
----@field imag number imaginary part of the complex number
+---@field public real number real part of the complex number
+---@field public imag number imaginary part of the complex number
 ---@operator add(Complex|number): Complex
 ---@operator sub(Complex|number): Complex
 ---@operator mul(Complex|number): Complex
@@ -64,6 +64,13 @@ local function asComplex(value)
 end
 M.asComplex = asComplex
 exports.asComplex = asComplex
+
+local function cloneComplex(z)
+    z = asComplex(z)
+    return newComplex(z.real, z.imag)
+end
+Complex.clone = cloneComplex
+M.cloneComplex = cloneComplex
 
 ---Calculates the absolute value of the number
 ---@param z Complex|number
@@ -145,6 +152,30 @@ end
 M.conj = cconj
 Complex.conj = cconj
 exports.cconj = cconj
+
+-- r is a power of 10 corresponding to how many decimal places should be kept
+local function rround(x, r)
+    return math.floor(x * r + 0.5) / r
+end
+
+---Round up to nearest Gaussian integer, or to other number of decimal places
+---@param z Complex|number
+---@param dp number? number of decimal places to keep (defualt 0)
+---@return Complex
+local function cround(z, dp)
+    if dp then
+        assert(type(dp) == "number", "Decimal places argument must be a number")
+        assert(dp % 1 == 0, "Decimal places argument must be an integer")
+    end
+    z = cloneComplex(z)
+    local r = 10^(dp or 0)
+    return newComplex(
+        rround(z.real, r),
+        rround(z.imag, r)
+    )
+end
+M.round = cround
+Complex.round = cround
 
 ---Creates a complex number from its polar form
 ---@param abs number absolute value of complex number
