@@ -4,7 +4,8 @@ local exports = {}
 
 -- Double floating point precision
 -- If using a Lua distribution that uses floats instead of doubles,
--- or if you want more lax equality checks, set epsilon to 1e-6
+-- or if you want more lax equality checks, set epsilon to 1e-6.
+-- This can be done in the requiring library instead of editing this file.
 M.epsilon = 1e-12
 
 ---@class Complex
@@ -65,6 +66,9 @@ end
 M.asComplex = asComplex
 exports.asComplex = asComplex
 
+---Creates a new complex number with the same components as the given one
+---@param z Complex|number
+---@return Complex
 local function cloneComplex(z)
     z = asComplex(z)
     return newComplex(z.real, z.imag)
@@ -142,7 +146,7 @@ end
 M.log = clog
 exports.clog = clog
 
----Conjugate, for a+bi returns a-bi
+---Complex conjugate, for a+bi returns a-bi
 ---@param z Complex|number
 ---@return Complex
 local function cconj(z)
@@ -158,7 +162,7 @@ local function rround(x, r)
     return math.floor(x * r + 0.5) / r
 end
 
----Round up to nearest Gaussian integer, or to other number of decimal places
+---Round to the nearest Gaussian integer, or to a number of decimal places
 ---@param z Complex|number
 ---@param dp number? number of decimal places to keep (defualt 0)
 ---@return Complex
@@ -201,6 +205,8 @@ local function csqrt(z)
 end
 M.sqrt = csqrt
 exports.csqrt = csqrt
+
+--#region hyperbolic and circular trig functions
 
 ---Hyperbolic sine
 ---@param z Complex|number
@@ -320,15 +326,23 @@ end
 M.atan = catan
 exports.catan = catan
 
+--#endregion
 
+---Checks if two complex numbers are close to each other
+---@param x Complex|number
+---@param y Complex|number
+---@return boolean
 local function cnear(x, y)
     return (x-y):abs() <= M.epsilon
 end
 
+---Checks if two Lua numbers are close to each other
+---@param x number
+---@param y number
+---@return boolean
 local function rnear(x, y)
     return math.abs(x-y) <= M.epsilon
 end
-
 
 Complex__meta.__add = function(x, y)
     x, y = asComplex(x), asComplex(y)
