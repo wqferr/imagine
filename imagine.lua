@@ -333,6 +333,7 @@ exports.catan = catan
 ---@param y Complex|number
 ---@return boolean
 local function cnear(x, y)
+    x, y = asComplex(x), asComplex(y)
     return (x-y):abs() <= M.epsilon
 end
 
