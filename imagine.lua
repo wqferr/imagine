@@ -339,34 +339,38 @@ Complex__meta.__tostring = function(x)
     local a, b = x.real, x.imag
     if rnear(a, 0) then
         a = 0
+    elseif rnear(a, 1) then
+        a = 1
+    elseif rnear(a, -1) then
+        a = -1
     end
     if rnear(b, 0) then
         b = 0
+    elseif rnear(b, 1) then
+        b = 1
+    elseif rnear(b, -1) then
+        b = -1
+    end
+    if b == 0 then
+        return tostring(a)
     end
     if a == 0 then
-        if b == 0 then
-            return "0"
-        elseif b == 1 then
+        if b == 1 then
             return "i"
         elseif b == -1 then
             return "-i"
         else
-            return tostring(b).."i"
-        end
-    elseif b == 0 then
-        return tostring(a)
-    end
-    if b > 0 then
-        if b == 1 then
-            return ("%s + i"):format(a)
-        else
-            return ("%s + %si"):format(a, b)
+            return ("%si"):format(b)
         end
     else
-        if b == -1 then
+        if b == 1 then
+            return ("%s + i"):format(a)
+        elseif b == -1 then
             return ("%s - i"):format(a)
+        elseif b > 0 then
+            return ("%s + %si"):format(a, b)
         else
-            return ("%s - %si"):format(a, -b)
+            return ("%s - %si"):format(a, b)
         end
     end
 end
