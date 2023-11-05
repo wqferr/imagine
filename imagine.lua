@@ -220,7 +220,7 @@ local function croots(z, n)
     local abs, arg = z:abs(), z:arg()
     local rabs = abs^(1/n)
     for i = 1, n do
-        local rarg = 2*(i-1)*math.pi / n
+        local rarg = arg + 2*(i-1)*math.pi / n
         local r = rabs * cis(rarg)
         table.insert(roots, r)
     end
