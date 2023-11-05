@@ -1,7 +1,5 @@
 local im = require "imagine".import()
 
-local z = im(3, math.sqrt(2))
-print(math.i)
-local w = z:conj()
-print(z + w)
-print(z * w)
+for _, r in ipairs(im.roots(im.one, 3)) do
+    print(r)
+end

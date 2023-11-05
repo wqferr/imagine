@@ -27,7 +27,7 @@ setmetatable(allComplexes, {__mode = "k", __index = function() return false end}
 ---Creates a new complex number with given real and imaginary parts
 ---@param real number real part of complex number
 ---@param imag number imaginary part of complex number
----@return Complex
+---@return Complex new new complex number with given components
 local function newComplex(real, imag)
     assert(real and imag, "Both parts of the complex number must be given")
     assert(type(real) == "number", "Real part of a complex number must be a real number")
@@ -38,12 +38,16 @@ local function newComplex(real, imag)
     allComplexes[c] = true
     return c
 end
+M.zero = newComplex(0, 0)
+M.one = newComplex(1, 0)
 M.i = newComplex(0, 1)
 exports.i = M.i
+exports.czero = M.zero
+exports.cone = M.one
 
 ---Checks whether a value is a complex number
----@param z any
----@return boolean
+---@param z any value to be checked
+---@return boolean complex whether or not the argument is a complex number
 local function isComplex(z)
     return allComplexes[z]
 end
@@ -52,7 +56,7 @@ exports.isComplex = isComplex
 
 ---Assures value is a complex number, if conversion is possible; is a no-op if value is a complex number
 ---@param value Complex|number value to be converted
----@return Complex
+---@return Complex c complex representation of the argument
 local function asComplex(value)
     if isComplex(value) then
         ---@cast value Complex
@@ -67,8 +71,8 @@ M.asComplex = asComplex
 exports.asComplex = asComplex
 
 ---Creates a new complex number with the same components as the given one
----@param z Complex|number
----@return Complex
+---@param z Complex|number number to copy
+---@return Complex copy copy of the given number
 local function cloneComplex(z)
     z = asComplex(z)
     return newComplex(z.real, z.imag)
@@ -76,9 +80,9 @@ end
 Complex.clone = cloneComplex
 M.cloneComplex = cloneComplex
 
----Calculates the absolute value of the number
----@param z Complex|number
----@return number
+---Calculates the modulus or absolute value of the number
+---@param z Complex|number number whose absolute value is desired
+---@return number abs absolute value of the argument
 local function cabs(z)
     if type(z) == "number" then
         return math.abs(z)
@@ -93,8 +97,8 @@ Complex.abs = cabs
 exports.cabs = cabs
 
 ---Calculates the argument (or phase) of the complex number
----@param z Complex|number
----@return number
+---@param z Complex|number number whose phase is desired
+---@return number arg phase of the given number
 local function carg(z)
     if type(z) == "number" then
         return 0
@@ -117,8 +121,8 @@ local function cis(theta)
 end
 
 ---Complex exponential function, calculates e^z
----@param z Complex|number
----@return Complex
+---@param z Complex|number point at which to calculate exponential
+---@return Complex exp complex exponential at the argument
 local function cexp(z)
     if type(z) == "number" then
         return newComplex(math.exp(z), 0)
@@ -132,8 +136,8 @@ M.exp = cexp
 exports.cexp = cexp
 
 ---Complex logarithm function, calculates ln(z)
----@param z Complex|number
----@return Complex
+---@param z Complex|number point at which to calculate the logarithm
+---@return Complex log the complex logarithm of the argument
 local function clog(z)
     if type(z) == "number" then
         return newComplex(math.log(z), 0)
@@ -147,8 +151,8 @@ M.log = clog
 exports.clog = clog
 
 ---Complex conjugate, for a+bi returns a-bi
----@param z Complex|number
----@return Complex
+---@param z Complex|number value whose conjugate is desired
+---@return Complex conjugate the conjugate value of the argument
 local function cconj(z)
     z = asComplex(z)
     return newComplex(z.real, -z.imag)
@@ -163,9 +167,9 @@ local function rround(x, r)
 end
 
 ---Round to the nearest Gaussian integer, or to a number of decimal places
----@param z Complex|number
+---@param z Complex|number number to be rounded
 ---@param dp number? number of decimal places to keep (defualt 0)
----@return Complex
+---@return Complex rounded rounded complex number
 local function cround(z, dp)
     if dp then
         assert(type(dp) == "number", "Decimal places argument must be a number")
@@ -184,7 +188,7 @@ Complex.round = cround
 ---Creates a complex number from its polar form
 ---@param abs number absolute value of complex number
 ---@param arg number argument or phase of complex number
----@return Complex
+---@return Complex new complex number of given polar form
 local function cpolar(abs, arg)
     assert(type(abs) == "number", "Absolute value must be a real number")
     assert(type(arg) == "number", "Argument must be a real number")
@@ -195,7 +199,7 @@ exports.cpolar = cpolar
 
 ---Complex square root function
 ---@param z Complex|number point whose square root is desired
----@return Complex|number
+---@return Complex|number root square root of point
 local function csqrt(z)
     if type(z) == "number" then
         return math.sqrt(z)
@@ -206,11 +210,40 @@ end
 M.sqrt = csqrt
 exports.csqrt = csqrt
 
+---Calculates nth roots of z
+---@param z Complex|number value whose roots are desired
+---@param n number index of the root
+local function croots(z, n)
+    assert(n > 0 and n % 1 == 0, "Index of root must be a positive integer")
+    z = asComplex(z)
+    local roots = {}
+    local abs, arg = z:abs(), z:arg()
+    local rabs = abs^(1/n)
+    for i = 1, n do
+        local rarg = 2*(i-1)*math.pi / n
+        local r = rabs * cis(rarg)
+        table.insert(roots, r)
+    end
+    return roots
+end
+M.roots = croots
+exports.croots = croots
+
+---Compares two numeric values for equality, up to im.epsilon
+---@param a Complex|number first number to compare
+---@param b Complex|number second number to compare
+---@return boolean equal whether the numbers are equal up to im.epsilon
+local function eq(a, b)
+    a, b = asComplex(a), asComplex(b)
+    return a == b
+end
+M.eq = eq
+
 --#region hyperbolic and circular trig functions
 
 ---Hyperbolic sine
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex s sinh(point)
 local function csinh(z)
     z = asComplex(z)
     return (cexp(z) - cexp(-z)) / 2
@@ -219,8 +252,8 @@ M.sinh = csinh
 exports.csinh = csinh
 
 ---Hyperbolic cosine
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex c cosh(point)
 local function ccosh(z)
     z = asComplex(z)
     return (cexp(z) + cexp(-z)) / 2
@@ -229,8 +262,8 @@ M.cosh = ccosh
 exports.ccosh = ccosh
 
 ---Hyperbolic tangent
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex t tanh(point)
 local function ctanh(z)
     z = asComplex(z)
     local z2 = 2*z
@@ -240,8 +273,8 @@ M.tanh = ctanh
 exports.ctanh = ctanh
 
 ---Area hyperbolic sine
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex as asinh(point)
 local function casinh(z)
     z = asComplex(z)
     return clog(z + csqrt(z*z + 1))
@@ -250,8 +283,8 @@ M.asinh = casinh
 exports.casinh = casinh
 
 ---Area hyperbolic cosine
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex ac acosh(point)
 local function cacosh(z)
     z = asComplex(z)
     return clog(z + csqrt(z*z - 1))
@@ -260,8 +293,8 @@ M.acosh = cacosh
 exports.cacosh = cacosh
 
 ---Area hyperbolic tangent
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex at atanh(point)
 local function catanh(z)
     z = asComplex(z)
     return 0.5 * clog((1 + z) / (1 - z))
@@ -270,8 +303,8 @@ M.atanh = catanh
 exports.catanh = catanh
 
 ---Sine function
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex s sin(point)
 local function csin(z)
     return -M.i * csinh(M.i * z)
 end
@@ -279,8 +312,8 @@ M.sin = csin
 exports.csin = csin
 
 ---Cosine function
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex c cos(point)
 local function ccos(z)
     return ccosh(M.i * z)
 end
@@ -288,8 +321,8 @@ M.cos = ccos
 exports.ccos = ccos
 
 ---Tangent function
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex t tan(point)
 local function ctan(z)
     return -M.i * ctanh(z)
 end
@@ -297,8 +330,8 @@ M.tan = ctan
 exports.ctan = ctan
 
 ---Arcsine function
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex as asin(point)
 local function casin(z)
     z = asComplex(z)
     return -M.i * clog(csqrt(1 - z*z) + M.i*z)
@@ -307,8 +340,8 @@ M.asin = casin
 exports.casin = casin
 
 ---Arccosine function
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex ac acos(point)
 local function cacos(z)
     z = asComplex(z)
     return -M.i * clog(M.i*csqrt(1 - z*z) + z)
@@ -317,8 +350,8 @@ M.acos = cacos
 exports.cacos = cacos
 
 ---Arctangent function
----@param z Complex|number
----@return Complex
+---@param z Complex|number point
+---@return Complex at atan(point)
 local function catan(z)
     z = asComplex(z)
     return -M.i/2 * clog((M.i - z) / (M.i + z))
@@ -329,18 +362,17 @@ exports.catan = catan
 --#endregion
 
 ---Checks if two complex numbers are close to each other
----@param x Complex|number
----@param y Complex|number
----@return boolean
+---@param x Complex first elment of comparison
+---@param y Complex second elment of comparison
+---@return boolean near whether the two values are close, up to im.epsilon
 local function cnear(x, y)
-    x, y = asComplex(x), asComplex(y)
     return (x-y):abs() <= M.epsilon
 end
 
 ---Checks if two Lua numbers are close to each other
----@param x number
----@param y number
----@return boolean
+---@param x number first element of comparison
+---@param y number second element of comparison
+---@return boolean near whether the two values are close, up to im.epsilon
 local function rnear(x, y)
     return math.abs(x-y) <= M.epsilon
 end
@@ -377,7 +409,9 @@ Complex__meta.__unm = function(x)
 end
 
 Complex__meta.__eq = function(x, y)
-    x, y = asComplex(x), asComplex(y)
+    -- x, y = asComplex(x), asComplex(y)
+    -- Lua only calls __eq on values that have the same metatable.
+    -- If this code is running, x and y are both Complex.
     return cnear(x, y)
 end
 
@@ -416,7 +450,7 @@ Complex__meta.__tostring = function(x)
         elseif b > 0 then
             return ("%s + %si"):format(a, b)
         else
-            return ("%s - %si"):format(a, b)
+            return ("%s - %si"):format(a, -b)
         end
     end
 end
