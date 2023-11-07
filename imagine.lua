@@ -377,23 +377,56 @@ local function rnear(x, y)
     return math.abs(x-y) <= M.epsilon
 end
 
+local function attemptOtherSideOp(x, y, op)
+    local mt = getmetatable(y)
+    if mt and mt[op] then
+        return mt[op](x, y)
+    else
+        return nil
+    end
+end
+
 Complex__meta.__add = function(x, y)
+    if isComplex(x) and not isComplex(y) then
+        local otherSideFirst = attemptOtherSideOp(x, y, "__add")
+        if otherSideFirst then
+            return otherSideFirst
+        end
+    end
     x, y = asComplex(x), asComplex(y)
     return newComplex(x.real + y.real, x.imag + y.imag)
 end
 
 Complex__meta.__sub = function(x, y)
+    if isComplex(x) and not isComplex(y) then
+        local otherSideFirst = attemptOtherSideOp(x, y, "__sub")
+        if otherSideFirst then
+            return otherSideFirst
+        end
+    end
     x, y = asComplex(x), asComplex(y)
     return newComplex(x.real - y.real, x.imag - y.imag)
 end
 
 Complex__meta.__mul = function(x, y)
+    if isComplex(x) and not isComplex(y) then
+        local otherSideFirst = attemptOtherSideOp(x, y, "__mul")
+        if otherSideFirst then
+            return otherSideFirst
+        end
+    end
     x, y = asComplex(x), asComplex(y)
     local a, b, c, d = x.real, x.imag, y.real, y.imag
     return newComplex(a*c - b*d, a*d + b*c)
 end
 
 Complex__meta.__div = function(x, y)
+    if isComplex(x) and not isComplex(y) then
+        local otherSideFirst = attemptOtherSideOp(x, y, "__div")
+        if otherSideFirst then
+            return otherSideFirst
+        end
+    end
     x, y = asComplex(x), asComplex(y)
     local a, b, c, d = x.real, x.imag, y.real, y.imag
     local ynorm2 = c*c + d*d
@@ -401,6 +434,12 @@ Complex__meta.__div = function(x, y)
 end
 
 Complex__meta.__pow = function(x, y)
+    if isComplex(x) and not isComplex(y) then
+        local otherSideFirst = attemptOtherSideOp(x, y, "__pow")
+        if otherSideFirst then
+            return otherSideFirst
+        end
+    end
     return cexp(y * clog(x))
 end
 
