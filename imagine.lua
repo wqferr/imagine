@@ -20,9 +20,6 @@ M.epsilon = 1e-12
 local Complex = {}
 local Complex__meta = {__index = Complex}
 
-local allComplexes = {}
-setmetatable(allComplexes, {__mode = "k", __index = function() return false end})
-
 
 ---Creates a new complex number with given real and imaginary parts
 ---@param real number real part of complex number
@@ -35,7 +32,6 @@ local function newComplex(real, imag)
     local c = setmetatable({}, Complex__meta)
     c.real = real
     c.imag = imag
-    allComplexes[c] = true
     return c
 end
 M.zero = newComplex(0, 0)
@@ -49,7 +45,7 @@ exports.cone = M.one
 ---@param z any value to be checked
 ---@return boolean complex whether or not the argument is a complex number
 local function isComplex(z)
-    return allComplexes[z]
+    return getmetatable(z) == Complex__meta
 end
 M.isComplex = isComplex
 exports.isComplex = isComplex
