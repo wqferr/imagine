@@ -1,3 +1,4 @@
+---@module "imagine"
 ---@class imagine
 local M = {}
 local exports = {}
