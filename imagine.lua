@@ -493,7 +493,7 @@ end
 
 
 ---Imports commonly used functions into the global or specified namespace
----@param renames {string: string, into: table?}? mapping from old names new names, with the special key "into" containing the table into which to import values
+---@param renames {string: string, into: table}? mapping from old names new names, with the special key "into" containing the table into which to import values
 ---@param into table? into which to import
 ---@return imagine imagine the module itself, so that this function can be called in the same line as the require
 M.import = function(renames, into)
