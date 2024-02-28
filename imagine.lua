@@ -263,8 +263,9 @@ exports.ccosh = ccosh
 ---@return Complex t tanh(point)
 local function ctanh(z)
     z = asComplex(z)
-    local z2 = 2*z
-    return ((cexp(z2) - 1) / (cexp(z2) + 1))
+    local ep = cexp(z)
+    local em = cexp(-z)
+    return (ep - em) / (ep + em)
 end
 M.tanh = ctanh
 exports.ctanh = ctanh
@@ -321,7 +322,7 @@ exports.ccos = ccos
 ---@param z Complex|number point
 ---@return Complex t tan(point)
 local function ctan(z)
-    return -M.i * ctanh(z)
+    return csin(z) / ccos(z)
 end
 M.tan = ctan
 exports.ctan = ctan
